@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html>
 <head>
@@ -13,8 +14,8 @@
             justify-content: center;
             align-items: center;
             background: #111;
-            font-family: Arial, sans-serif;
             color: white;
+            font-family: Arial, sans-serif;
         }
 
         .panel {
@@ -25,16 +26,13 @@
             border-radius: 15px;
         }
 
-        h1 {
-            margin-bottom: 30px;
-        }
-
         button {
             width: 100%;
             padding: 18px;
             margin: 10px 0;
-            border: none;
+            border: 0;
             border-radius: 10px;
+            color: white;
             font-size: 20px;
             font-weight: bold;
             cursor: pointer;
@@ -42,12 +40,10 @@
 
         #start {
             background: #22c55e;
-            color: white;
         }
 
         #stop {
             background: #ef4444;
-            color: white;
         }
 
         #status {
@@ -62,21 +58,63 @@
 <div class="panel">
     <h1>Remote Control</h1>
 
-    <button id="start" onclick="startSystem()">START</button>
-    <button id="stop" onclick="stopSystem()">STOP</button>
+    <button id="start" onclick="setRunning(true)">START</button>
+    <button id="stop" onclick="setRunning(false)">STOP</button>
 
-    <div id="status">Status: OFFLINE</div>
+    <div id="status">Status: loading...</div>
 </div>
 
 <script>
-    function startSystem() {
-        document.getElementById("status").textContent = "Status: START requested";
-    }
+    const SUPABASE_URL =
+        "https://jjgefzqmsmilwskdvubl.supabase.co";
 
-    function stopSystem() {
-        document.getElementById("status").textContent = "Status: STOP requested";
+    const SUPABASE_KEY =
+        "sb_publishable_R5-W6S8GjojkR8yo-Y_X9g_0AK_P1Lc";
+
+    async function setRunning(value) {
+        const status = document.getElementById("status");
+
+        status.textContent = "Sending...";
+
+        try {
+            const response = await fetch(
+                SUPABASE_URL + "/rest/v1/remote_control?id=eq.1",
+                {
+                    method: "PATCH",
+
+                    headers: {
+                        "apikey": SUPABASE_KEY,
+                        "Authorization": "Bearer " + SUPABASE_KEY,
+                        "Content-Type": "application/json",
+                        "Prefer": "return=minimal"
+                    },
+
+                    body: JSON.stringify({
+                        running: value
+                    })
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error(
+                    "HTTP " + response.status
+                );
+            }
+
+            status.textContent =
+                value
+                ? "Status: RUNNING"
+                : "Status: STOPPED";
+
+        } catch (error) {
+            console.error(error);
+
+            status.textContent =
+                "Error: " + error.message;
+        }
     }
 </script>
 
 </body>
 </html>
+```
