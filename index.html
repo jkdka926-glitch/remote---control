@@ -4,38 +4,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Remote Control</title>
 
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
             min-height: 100vh;
+
             display: flex;
             justify-content: center;
             align-items: center;
+
             background: #111;
             color: white;
+
             font-family: Arial, sans-serif;
         }
 
         .panel {
-            width: 350px;
+            width: 90%;
+            max-width: 600px;
+
+            background: #1c1c22;
+
             padding: 30px;
-            text-align: center;
-            background: #1c1c1c;
+
             border-radius: 15px;
+
+            box-shadow:
+                0 15px 40px
+                rgba(0, 0, 0, 0.4);
+        }
+
+        h1 {
+            margin-top: 0;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            margin-bottom: 12px;
+        }
+
+        .label {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .value {
+            color: #5a78ff;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+
+            appearance: none;
+
+            background: #38383f;
+
+            border-radius: 10px;
+
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+
+            width: 22px;
+            height: 22px;
+
+            border-radius: 50%;
+
+            background: #5a78ff;
+
+            cursor: pointer;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 22px;
+            height: 22px;
+
+            border-radius: 50%;
+
+            background: #5a78ff;
+
+            cursor: pointer;
+
+            border: none;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 12px;
         }
 
         button {
-            width: 100%;
+            flex: 1;
+
             padding: 18px;
-            margin: 10px 0;
+
             border: 0;
+
             border-radius: 10px;
+
             color: white;
+
             font-size: 20px;
+
             font-weight: bold;
+
             cursor: pointer;
+        }
+
+        button:hover {
+            filter: brightness(1.1);
+        }
+
+        button:active {
+            transform: scale(0.98);
         }
 
         #start {
@@ -48,6 +150,15 @@
 
         #status {
             margin-top: 20px;
+
+            padding: 15px;
+
+            border-radius: 10px;
+
+            background: #111;
+
+            text-align: center;
+
             color: #aaa;
         }
     </style>
@@ -56,63 +167,360 @@
 <body>
 
 <div class="panel">
+
     <h1>Remote Control</h1>
 
-    <button id="start" onclick="setRunning(true)">START</button>
-    <button id="stop" onclick="setRunning(false)">STOP</button>
 
-    <div id="status">Status: loading...</div>
+    <!-- VERTICAL STRENGTH -->
+
+    <div class="section">
+
+        <div class="label-row">
+
+            <div class="label">
+                Vertical Strength
+            </div>
+
+            <div
+                class="value"
+                id="strengthValue">
+                5
+            </div>
+
+        </div>
+
+        <input
+            type="range"
+            id="strengthSlider"
+            min="0"
+            max="50"
+            value="5"
+            step="1"
+        >
+
+    </div>
+
+
+    <!-- START / STOP -->
+
+    <div class="buttons">
+
+        <button
+            id="start"
+            onclick="setRunning(true)">
+            START
+        </button>
+
+        <button
+            id="stop"
+            onclick="setRunning(false)">
+            STOP
+        </button>
+
+    </div>
+
+
+    <!-- STATUS -->
+
+    <div id="status">
+        Status: loading...
+    </div>
+
 </div>
 
+
 <script>
+
+    // ========================================================
+    // SUPABASE
+    // ========================================================
+
     const SUPABASE_URL =
         "https://jjgefzqmsmilwskdvubl.supabase.co";
 
     const SUPABASE_KEY =
         "sb_publishable_R5-W6S8GjojkR8yo-Y_X9g_0AK_P1Lc";
 
-    async function setRunning(value) {
-        const status = document.getElementById("status");
 
-        status.textContent = "Sending...";
+    // ========================================================
+    // ELEMENTS
+    // ========================================================
 
+    const slider =
+        document.getElementById(
+            "strengthSlider"
+        );
+
+    const strengthValue =
+        document.getElementById(
+            "strengthValue"
+        );
+
+    const status =
+        document.getElementById(
+            "status"
+        );
+
+
+    // ========================================================
+    // LOAD CURRENT SETTINGS
+    // ========================================================
+
+    async function loadSettings()
+    {
         try {
-            const response = await fetch(
-                SUPABASE_URL + "/rest/v1/remote_control?id=eq.1",
-                {
-                    method: "PATCH",
 
-                    headers: {
-                        "apikey": SUPABASE_KEY,
-                        "Authorization": "Bearer " + SUPABASE_KEY,
-                        "Content-Type": "application/json",
-                        "Prefer": "return=minimal"
-                    },
+            const response =
+                await fetch(
+                    SUPABASE_URL +
+                    "/rest/v1/remote_control?select=running,vertical_strength&id=eq.1",
+                    {
+                        method: "GET",
 
-                    body: JSON.stringify({
-                        running: value
-                    })
-                }
-            );
+                        headers: {
+                            "apikey":
+                                SUPABASE_KEY,
 
-            if (!response.ok) {
+                            "Authorization":
+                                "Bearer " +
+                                SUPABASE_KEY
+                        }
+                    }
+                );
+
+
+            if (!response.ok)
+            {
                 throw new Error(
-                    "HTTP " + response.status
+                    "HTTP " +
+                    response.status
                 );
             }
 
-            status.textContent =
-                value
-                ? "Status: RUNNING"
-                : "Status: STOPPED";
 
-        } catch (error) {
+            const data =
+                await response.json();
+
+
+            if (
+                !data ||
+                data.length === 0
+            )
+            {
+                throw new Error(
+                    "Remote control row not found"
+                );
+            }
+
+
+            const settings =
+                data[0];
+
+
+            // Set slider
+            slider.value =
+                settings.vertical_strength;
+
+
+            strengthValue.textContent =
+                settings.vertical_strength;
+
+
+            // Set status
+            updateStatus(
+                settings.running
+            );
+
+
+        }
+        catch (error)
+        {
             console.error(error);
 
             status.textContent =
-                "Error: " + error.message;
+                "Error: " +
+                error.message;
         }
     }
+
+
+    // ========================================================
+    // START / STOP
+    // ========================================================
+
+    async function setRunning(value)
+    {
+        status.textContent =
+            "Sending...";
+
+
+        try
+        {
+            const response =
+                await fetch(
+                    SUPABASE_URL +
+                    "/rest/v1/remote_control?id=eq.1",
+                    {
+                        method: "PATCH",
+
+                        headers: {
+                            "apikey":
+                                SUPABASE_KEY,
+
+                            "Authorization":
+                                "Bearer " +
+                                SUPABASE_KEY,
+
+                            "Content-Type":
+                                "application/json",
+
+                            "Prefer":
+                                "return=minimal"
+                        },
+
+                        body:
+                            JSON.stringify({
+                                running: value
+                            })
+                    }
+                );
+
+
+            if (!response.ok)
+            {
+                throw new Error(
+                    "HTTP " +
+                    response.status
+                );
+            }
+
+
+            updateStatus(
+                value
+            );
+
+        }
+        catch (error)
+        {
+            console.error(error);
+
+            status.textContent =
+                "Error: " +
+                error.message;
+        }
+    }
+
+
+    // ========================================================
+    // UPDATE STATUS DISPLAY
+    // ========================================================
+
+    function updateStatus(running)
+    {
+        status.textContent =
+            running
+            ? "Status: RUNNING"
+            : "Status: STOPPED";
+    }
+
+
+    // ========================================================
+    // SLIDER DISPLAY
+    // ========================================================
+
+    slider.addEventListener(
+        "input",
+        function()
+        {
+            strengthValue.textContent =
+                this.value;
+        }
+    );
+
+
+    // ========================================================
+    // SAVE SLIDER
+    // ========================================================
+
+    slider.addEventListener(
+        "change",
+        async function()
+        {
+            const value =
+                Number(
+                    this.value
+                );
+
+
+            status.textContent =
+                "Saving strength...";
+
+
+            try
+            {
+                const response =
+                    await fetch(
+                        SUPABASE_URL +
+                        "/rest/v1/remote_control?id=eq.1",
+                        {
+                            method: "PATCH",
+
+                            headers: {
+                                "apikey":
+                                    SUPABASE_KEY,
+
+                                "Authorization":
+                                    "Bearer " +
+                                    SUPABASE_KEY,
+
+                                "Content-Type":
+                                    "application/json",
+
+                                "Prefer":
+                                    "return=minimal"
+                            },
+
+                            body:
+                                JSON.stringify({
+                                    vertical_strength:
+                                        value
+                                })
+                        }
+                    );
+
+
+                if (!response.ok)
+                {
+                    throw new Error(
+                        "HTTP " +
+                        response.status
+                    );
+                }
+
+
+                status.textContent =
+                    "Strength saved: " +
+                    value;
+
+            }
+            catch (error)
+            {
+                console.error(error);
+
+                status.textContent =
+                    "Error: " +
+                    error.message;
+            }
+        }
+    );
+
+
+    // ========================================================
+    // INITIAL LOAD
+    // ========================================================
+
+    loadSettings();
+
 </script>
 
 </body>
