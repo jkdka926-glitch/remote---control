@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remote Control</title>
+
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #111;
+            font-family: Arial, sans-serif;
+            color: white;
+        }
+
+        .panel {
+            width: 350px;
+            padding: 30px;
+            text-align: center;
+            background: #1c1c1c;
+            border-radius: 15px;
+        }
+
+        h1 {
+            margin-bottom: 30px;
+        }
+
+        button {
+            width: 100%;
+            padding: 18px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 10px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        #start {
+            background: #22c55e;
+            color: white;
+        }
+
+        #stop {
+            background: #ef4444;
+            color: white;
+        }
+
+        #status {
+            margin-top: 20px;
+            color: #aaa;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="panel">
+    <h1>Remote Control</h1>
+
+    <button id="start" onclick="startSystem()">START</button>
+    <button id="stop" onclick="stopSystem()">STOP</button>
+
+    <div id="status">Status: OFFLINE</div>
+</div>
+
+<script>
+    function startSystem() {
+        document.getElementById("status").textContent = "Status: START requested";
+    }
+
+    function stopSystem() {
+        document.getElementById("status").textContent = "Status: STOP requested";
+    }
+</script>
+
+</body>
+</html>
